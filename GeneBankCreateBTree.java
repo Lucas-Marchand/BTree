@@ -59,8 +59,8 @@ public class GeneBankCreateBTree {
 
 							// Pass the key value into a BTreeNode and
 							// build the BTree
-							
-							
+							BTree tree = new BTree(arg0,);
+							tree.add(new BTreeNode(long, lisnt,long,long));
 							
 							
 							
