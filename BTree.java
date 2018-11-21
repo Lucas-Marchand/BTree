@@ -1,25 +1,37 @@
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
-import java.util.LinkedList;
 
 /*
  *  gbk file layout
- *  BOF| int location of root | root node |  |EOF
+ *  | BOF | int location of root | int number of keys | int size of each Key | int degree | beginning of root node | ... rest of nodes | EOF |
+ *  
+ *  BTreeNode layout
+ *  | BOF | 
  *  
  *  
  */
 public class BTree {
-	int metaDataSize = 10;
-	LinkedList<TreeObject> data;
+	int metaDataSize;
+	int rootLocation;
+	int numTreeObjects;
+	int keySize;
+	int degree;
+	
+	BTreeNode root;
+	
 	static File gbk;
 	static RandomAccessFile file;
 	
 	public BTree(){
 		try {
 			file = new RandomAccessFile(gbk,"rwd");
+			rootLocation = file.readInt();
+			numTreeObjects = file.readInt();
+			keySize = file.readInt();
+			degree = file.readInt();
+			file.seek(rootLocation);
 			
-		} catch (FileNotFoundException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
