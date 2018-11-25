@@ -1,28 +1,34 @@
+/**
+ * @author Lucas, Lam, Tuan
+ *
+ */
 public class BTreeNode {
-	int fileOffset;
-	int numObjects;
-	boolean leaf;
-	long data;
+	private int nodeOffset;
+	private int numObjects;
+	private boolean leaf;
+	private TreeObject[] objects;
+	private int[] childrenOffsets;
 	
-	public BTreeNode(int fileOffset,int numObjects,boolean leaf, long data) {
-		this.fileOffset = fileOffset;
+	public BTreeNode(int nodeOffset,int numObjects, int degree) {
+		this.nodeOffset = nodeOffset;
 		this.numObjects = numObjects;
-		this.leaf = leaf;
-		this.data = data;
+		leaf = true;
+		objects = new TreeObject[2*degree - 1];
+		childrenOffsets = new int[2*degree];
 	}
 
 	/**
-	 * @return the fileOffset
+	 * @return the nodeOffset
 	 */
-	public int getFileOffset() {
-		return fileOffset;
+	public int getnodeOffset() {
+		return nodeOffset;
 	}
 
 	/**
-	 * @param fileOffset the fileOffset to set
+	 * @param nodeOffset the nodeOffset to set
 	 */
-	public void setFileOffset(int fileOffset) {
-		this.fileOffset = fileOffset;
+	public void setnodeOffset(int nodeOffset) {
+		this.nodeOffset = nodeOffset;
 	}
 
 	/**
@@ -54,16 +60,30 @@ public class BTreeNode {
 	}
 
 	/**
-	 * @return the data
+	 * @return the object[index]
 	 */
-	public long getData() {
-		return data;
+	public TreeObject getObjectAt(int index) {
+		return objects[index];
 	}
 
 	/**
-	 * @param data the data to set
+	 * @param index, the obj to set
 	 */
-	public void setData(long data) {
-		this.data = data;
+	public void setObjectAt(int index, TreeObject obj) {
+		 objects[index] = obj;
+	}
+	
+	/**
+	 * @return the offsetOfChild
+	 */
+	public int getChildOffsetAt(int index) {
+		return childrenOffsets[index];
+	}
+
+	/**
+	 * @param index, the obj to set
+	 */
+	public void setChildrenOffsetAt(int index, int offset) {
+		 childrenOffsets[index] = offset;
 	}
 }

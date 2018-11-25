@@ -3,7 +3,7 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 /**
- * @author Tuan
+ * @author Tuan, Lam
  *
  */
 public class GeneBankCreateBTree {
@@ -12,6 +12,11 @@ public class GeneBankCreateBTree {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		
+		//TODO
+		//Cache
+		//Debug level
+		
 		int seqLength = Integer.parseInt(args[3]);
 		boolean seq = false;
 		String leftover = "";
@@ -32,43 +37,39 @@ public class GeneBankCreateBTree {
 					while (i + seqLength <= seqLine.length()) {
 						String subSeq = seqLine.substring(i, i + seqLength);
 						String binNum = "";
-						if (!subSeq.contains("n") && !subSeq.contains("N")) {
+						subSeq = subSeq.toLowerCase();
+						if (!subSeq.contains("n")) {
 							for (int j = 0; j < subSeq.length(); j++) {
 								String bin = "";
 								switch (subSeq.charAt(j)) {
 								case 'a':
-								case 'A':
 									bin = "00";
 									break;
 								case 't':
-								case 'T':
 									bin = "11";
 									break;
 								case 'c':
-								case 'C':
 									bin = "01";
 									break;
 								case 'g':
-								case 'G':
 									bin = "10";
 									break;
 								}
 								binNum = binNum + bin;
 							}
 							long keyVal = Long.parseLong(binNum, 2);
+							
+							int degree = Integer.parseInt(args[1]);
+							
+							BTree tree;
+							if (degree == 0) {
+								tree = new BTree();
+							} else {
+								tree = new BTree(degree);
+							}
 
-							// Pass the key value into a BTreeNode and
-							// build the BTree
-							BTree tree = new BTree(arg0,);
-							tree.add(new BTreeNode(long, lisnt,long,long));
-							
-							
-							
-							
-							
-							
-							
-							
+							//tree.add(new TreeObject(keyVal));
+		
 						}
 						i++;
 					}

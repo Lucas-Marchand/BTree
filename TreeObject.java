@@ -1,22 +1,25 @@
-
+/**
+ * @author Lucas, Lam, Tuan
+ *
+ */
 public class TreeObject {
-	long data;
-	int leftChild;
-	int rightChild;
-	int frequency;
+	private long key;
+	private int frequency;
 	
-	public TreeObject(long data, int leftChild, int rightChild) {
-		this.data = data;
-		this.leftChild = leftChild;
-		this.rightChild = rightChild;
-		frequency = 0;
+	public TreeObject(long key) {
+		this.key = key;
+		frequency = 1;
 	}
 	
 	public void incrementFrequency() {
-		++frequency;
+		frequency++;
 	}
 	
 	public int getFrequency() {
 		return frequency;
+	}
+	
+	public long getKey() {
+		return key;
 	}
 }
