@@ -6,14 +6,16 @@ public class BTreeNode {
 	private int nodeOffset;
 	private int numObjects;
 	private boolean leaf;
-	private TreeObject[] objects;
+	private boolean full;
+	private int[] objects;
 	private int[] childrenOffsets;
 	
 	public BTreeNode(int nodeOffset,int numObjects, int degree) {
+		this.setFull(false);
 		this.nodeOffset = nodeOffset;
 		this.numObjects = numObjects;
 		leaf = true;
-		objects = new TreeObject[2*degree - 1];
+		objects = new int[2*degree - 1];
 		childrenOffsets = new int[2*degree];
 	}
 
@@ -62,14 +64,14 @@ public class BTreeNode {
 	/**
 	 * @return the object[index]
 	 */
-	public TreeObject getObjectAt(int index) {
+	public int getObjectAt(int index) {
 		return objects[index];
 	}
 
 	/**
 	 * @param index, the obj to set
 	 */
-	public void setObjectAt(int index, TreeObject obj) {
+	public void setObjectAt(int index, int obj) {
 		 objects[index] = obj;
 	}
 	
@@ -79,11 +81,23 @@ public class BTreeNode {
 	public int getChildOffsetAt(int index) {
 		return childrenOffsets[index];
 	}
+	
+	public boolean addData() {
+		return false;
+	}
 
 	/**
 	 * @param index, the obj to set
 	 */
 	public void setChildrenOffsetAt(int index, int offset) {
 		 childrenOffsets[index] = offset;
+	}
+
+	public boolean isFull() {
+		return full;
+	}
+
+	public void setFull(boolean full) {
+		this.full = full;
 	}
 }

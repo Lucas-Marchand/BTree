@@ -5,10 +5,14 @@
 public class TreeObject {
 	private long key;
 	private int frequency;
+	private int leftChild;
+	private int rightChild;
 	
 	public TreeObject(long key) {
 		this.key = key;
-		frequency = 1;
+		this.frequency = 1;
+		this.setLeftChild(-1);
+		this.setRightChild(-1);
 	}
 	
 	public void incrementFrequency() {
@@ -21,5 +25,29 @@ public class TreeObject {
 	
 	public long getKey() {
 		return key;
+	}
+	
+	public boolean hasLeftChild() {
+		return leftChild >= 0;
+	}
+	
+	public boolean hasRightChild() {
+		return rightChild >= 0;
+	}
+
+	public int getLeftChild() {
+		return leftChild;
+	}
+
+	public void setLeftChild(int leftChild) {
+		this.leftChild = leftChild;
+	}
+
+	public int getRightChild() {
+		return rightChild;
+	}
+
+	public void setRightChild(int rightChild) {
+		this.rightChild = rightChild;
 	}
 }
