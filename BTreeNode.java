@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 /**
  * @author Lucas, Lam, Tuan
  *
@@ -7,7 +9,7 @@ public class BTreeNode {
 	private int numObjects;
 	private boolean leaf;
 	private boolean full;
-	private int[] objects;
+	private ArrayList<Integer> objects;
 	private int[] childrenOffsets;
 	
 	public BTreeNode(int nodeOffset,int numObjects, int degree) {
@@ -15,7 +17,7 @@ public class BTreeNode {
 		this.nodeOffset = nodeOffset;
 		this.numObjects = numObjects;
 		leaf = true;
-		objects = new int[2*degree - 1];
+		objects = new ArrayList<Integer>();
 		childrenOffsets = new int[2*degree];
 	}
 
@@ -65,14 +67,14 @@ public class BTreeNode {
 	 * @return the object[index]
 	 */
 	public int getObjectAt(int index) {
-		return objects[index];
+		return objects.get(index);
 	}
 
 	/**
 	 * @param index, the obj to set
 	 */
-	public void setObjectAt(int index, int obj) {
-		 objects[index] = obj;
+	public void add(int index, int element) {
+		 objects.set(index, element);
 	}
 	
 	/**

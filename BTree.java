@@ -36,9 +36,10 @@ public class BTree {
 		
 	}	
 	
-	public void add(long data) {
+	// recursive add method to add to a BTree 
+	public void add(long data,int location) {
 		// create a node from file to start searching with
-		BTreeNode temp = GetNodeFromFile(rootLocation);
+		BTreeNode temp = GetNodeFromFile(location);
 		int numObjects = temp.getNumObjects();
 		
 		// iterate through all objects in the node
@@ -51,19 +52,26 @@ public class BTree {
 				return;
 			}else { // check if it is higher or lower.
 				if(data < key) {
-					if(i+1 < numObjects) {
-						temp.getObjectAt(i+1);
+					if (temp.isFull()) {
+						int newNode = SplitNodeInFile(location);
+						add(data, newNode);
 					}else {
-						
+						int tObject = CreateTreeObjectInFile();
+						temp.add( location, tObject);
 					}
 				}
 			}
 		}
 	}
 	
-	private TreeObject CreateTreeObject(long data, int frequency) {
+	private int CreateTreeObjectInFile() {
 		// TODO
-		return null;
+		return 0;
+	}
+	
+	private int CreateNodeInFile() {
+		// TODO
+		return 0;
 	}
 	
 	private BTreeNode GetNodeFromFile(int location) {
@@ -76,9 +84,9 @@ public class BTree {
 		return null;
 	}
 	
-	private BTreeNode SplitNode() {
-		return null;
-		// TODO Auto-generated method stub
+	private int SplitNodeInFile(int location) {
+		return 0;
+		// TODO returns the integer of the root node of the two split nodes.
 		
 	}
 
