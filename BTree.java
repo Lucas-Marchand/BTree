@@ -1,77 +1,77 @@
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
 /*
- *  gbk file Layout
- *  | BOF | int location of root | int number of keys | int size of each Key | int degree | beginning of root node | ... rest of nodes | EOF |
+ *  BTree file Layout
+ *  | BOF | int location of root | int degree | beginning of root node | ... rest of nodes | EOF |
  *  
  *  BTreeNode Layout
- *  | BOF | Boolean leaf | int location | int numObject | int TreeObject #1 | int TreeObject #2 | int TreeObject #n | EOF |
+ *  | BOF | int location | int numObject | Boolean leaf | int TreeObject #1 | int TreeObject #2 | int TreeObject #n | EOF |
  *  
  *  TreeObject Layout
- *  | BOF | int leftChild | int rightChild | int frequency | long key |
+ *  | BOF | long key | int frequency | EOF |
  *  
  *  
  */
 public class BTree {
-	int metaDataSize;
-	int rootLocation;
+	int rootLocation = 8;
 	int numTreeObjects;
 	int keySize;
 	int degree;
 	
 	BTreeNode root;
 	
-	static File gbk;
 	static RandomAccessFile file;
 	
 	public BTree(int degree){
+		numTreeObjects = CalcNumTreeObjects(this.degree);
+		BTreeNode root = new BTreeNode(rootLocation, numTreeObjects, true);
 		try {
-			file = new RandomAccessFile(gbk,"rwd");
-			
+			file = new RandomAccessFile("BTreeFile", "rwd");
+			WriteMetaData();
+			WriteNodeToFile(root);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
 	}	
-	
-	// recursive add method to add to a BTree 
-	public void add(long data,int location) {
-		// create a node from file to start searching with
-		BTreeNode temp = GetNodeFromFile(location);
-		int numObjects = temp.getNumObjects();
-		
-		// iterate through all objects in the node
-		for (int i = 0; i < numObjects; i++) {
-			TreeObject to = GetTreeObjectFromFile(temp.getObjectAt(i));
-			long key = to.getKey();
-			// check if the Tree Object has the same value;
-			if(data == key) {
-				to.incrementFrequency();
-				return;
-			}else { // check if it is higher or lower.
-				if(data < key) {
-					if (temp.isFull()) {
-						int newNode = SplitNodeInFile(location);
-						add(data, newNode);
-					}else {
-						int tObject = CreateTreeObjectInFile();
-						temp.add( location, tObject);
-					}
-				}
-			}
+
+	public BTree() {
+		numTreeObjects = CalcNumTreeObjects(optimalDegree());
+		BTreeNode root = new BTreeNode(rootLocation, numTreeObjects, true);
+		try {
+			file = new RandomAccessFile("BTreeFile", "rwd");
+			WriteMetaData();
+			WriteNodeToFile(root);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 	
-	private int CreateTreeObjectInFile() {
+	private void WriteMetaData() throws IOException {
+		file.writeInt(rootLocation);
+		file.writeInt(degree);
+	}
+
+	private void WriteNodeToFile(BTreeNode node) throws IOException {
+		file.writeInt(node.getFileOffset());
+		file.writeInt(node.getNumObjects());
+		file.writeBoolean(node.isLeaf());
+	}
+	
+	private int WriteTreeObjectToFile() {
 		// TODO
 		return 0;
 	}
 	
-	private int CreateNodeInFile() {
-		// TODO
-		return 0;
+	// recursive add method to add to a BTree 
+	public void add(long data,int location) {
+		
+	}
+	
+	private int CalcNumTreeObjects(int deg) {
+		return (2*deg-1);
 	}
 	
 	private BTreeNode GetNodeFromFile(int location) {
@@ -91,7 +91,6 @@ public class BTree {
 	}
 
 	private int optimalDegree() {
-		
 		return 0;
 	}
 	
