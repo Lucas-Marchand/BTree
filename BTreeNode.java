@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import java.util.ArrayList;
 
 /**
@@ -19,20 +20,33 @@ public class BTreeNode {
 		leaf = true;
 		objects = new ArrayList<Integer>();
 		childrenOffsets = new int[2*degree];
+=======
+public class BTreeNode {
+	int fileOffset;
+	int numObjects;
+	boolean leaf;
+	long data;
+	
+	public BTreeNode(int fileOffset,int numObjects,boolean leaf, long data) {
+		this.fileOffset = fileOffset;
+		this.numObjects = numObjects;
+		this.leaf = leaf;
+		this.data = data;
+>>>>>>> parent of 56845d4... Add files via upload
 	}
 
 	/**
-	 * @return the nodeOffset
+	 * @return the fileOffset
 	 */
-	public int getnodeOffset() {
-		return nodeOffset;
+	public int getFileOffset() {
+		return fileOffset;
 	}
 
 	/**
-	 * @param nodeOffset the nodeOffset to set
+	 * @param fileOffset the fileOffset to set
 	 */
-	public void setnodeOffset(int nodeOffset) {
-		this.nodeOffset = nodeOffset;
+	public void setFileOffset(int fileOffset) {
+		this.fileOffset = fileOffset;
 	}
 
 	/**
@@ -64,6 +78,7 @@ public class BTreeNode {
 	}
 
 	/**
+<<<<<<< HEAD
 	 * @return the object[index]
 	 */
 	public int getObjectAt(int index) {
@@ -79,9 +94,12 @@ public class BTreeNode {
 	
 	/**
 	 * @return the offsetOfChild
+=======
+	 * @return the data
+>>>>>>> parent of 56845d4... Add files via upload
 	 */
-	public int getChildOffsetAt(int index) {
-		return childrenOffsets[index];
+	public long getData() {
+		return data;
 	}
 	
 	public boolean addData() {
@@ -89,10 +107,10 @@ public class BTreeNode {
 	}
 
 	/**
-	 * @param index, the obj to set
+	 * @param data the data to set
 	 */
-	public void setChildrenOffsetAt(int index, int offset) {
-		 childrenOffsets[index] = offset;
+	public void setData(long data) {
+		this.data = data;
 	}
 
 	public boolean isFull() {
