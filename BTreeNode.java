@@ -8,7 +8,7 @@ public class BTreeNode {
 	private int fileOffset;
 	private int numObjects;
 	private boolean leaf;
-	private boolean full;
+	private int numChildren;
 	private int[] objects;
 	private int[] childrenOffsets;
 	
@@ -16,6 +16,7 @@ public class BTreeNode {
 		this.fileOffset = fileOffset;
 		this.numObjects = numObjects;
 		this.leaf = leaf;
+		setNumChildren(0);
 		objects = new int[numObjects];
 		childrenOffsets = new int[numObjects+1];
 	}
@@ -62,12 +63,12 @@ public class BTreeNode {
 		this.leaf = leaf;
 	}
 
-	/**
-<<<<<<< HEAD
-	 * @return the object[index]
-	 */
 	public int getObjectAt(int index) {
 		return objects[index];
+	}
+	
+	public int setObjectAt(int index, int element) {
+		return objects[index] = element;
 	}
 
 	/**
@@ -81,11 +82,19 @@ public class BTreeNode {
 		return false;
 	}
 
-	public boolean isFull() {
-		return full;
+	public int getChildrenOffset(int index) {
+		return childrenOffsets[index];
 	}
 
-	public void setFull(boolean full) {
-		this.full = full;
+	public void setChildrenOffset(int index, int element) {
+		this.childrenOffsets[index] = element;
+	}
+
+	public int getNumChildren() {
+		return numChildren;
+	}
+
+	public void setNumChildren(int numChildren) {
+		this.numChildren = numChildren;
 	}
 }
