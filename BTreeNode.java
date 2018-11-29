@@ -1,38 +1,34 @@
-import java.util.ArrayList;
-
 /**
- * @author Lucas, Lam, Tuan, Adel
+ * @author Lucas, Lam, Tuan
  *
  */
 public class BTreeNode {
-	private int fileOffset;
+	private int nodeOffset;
 	private int numObjects;
 	private boolean leaf;
-	private int numChildren;
-	private int[] objects;
+	private TreeObject[] objects;
 	private int[] childrenOffsets;
 	
-	public BTreeNode(int fileOffset,int numObjects,boolean leaf) {
-		this.fileOffset = fileOffset;
+	public BTreeNode(int nodeOffset,int numObjects, Boolean leaf, int degree) {
+		this.nodeOffset = nodeOffset;
 		this.numObjects = numObjects;
-		this.leaf = leaf;
-		setNumChildren(0);
-		objects = new int[numObjects];
-		childrenOffsets = new int[numObjects+1];
+		leaf = true;
+		objects = new TreeObject[2*degree - 1];
+		childrenOffsets = new int[2*degree];
 	}
 
 	/**
-	 * @return the fileOffset
+	 * @return the nodeOffset
 	 */
-	public int getFileOffset() {
-		return fileOffset;
+	public int getnodeOffset() {
+		return nodeOffset;
 	}
 
 	/**
-	 * @param fileOffset the fileOffset to set
+	 * @param nodeOffset the nodeOffset to set
 	 */
-	public void setFileOffset(int fileOffset) {
-		this.fileOffset = fileOffset;
+	public void setnodeOffset(int nodeOffset) {
+		this.nodeOffset = nodeOffset;
 	}
 
 	/**
@@ -62,39 +58,40 @@ public class BTreeNode {
 	public void setLeaf(boolean leaf) {
 		this.leaf = leaf;
 	}
-
-	public int getObjectAt(int index) {
-		return objects[index];
+	
+	public TreeObject[] getObjects() {
+		return objects;
 	}
 	
-	public int setObjectAt(int index, int element) {
-		return objects[index] = element;
+	public int[] getChildren() {
+		return childrenOffsets;
+	}
+
+	/**
+	 * @return the object[index]
+	 */
+	public TreeObject getObjectAt(int index) {
+		return objects[index];
 	}
 
 	/**
 	 * @param index, the obj to set
 	 */
-	public void add(int index, int element) {
-		 objects[index] = element;
+	public void setObjectAt(int index, TreeObject obj) {
+		 objects[index] = obj;
 	}
 	
-	public boolean addData() {
-		return false;
-	}
-
-	public int getChildrenOffset(int index) {
+	/**
+	 * @return the offsetOfChild
+	 */
+	public int getChildOffsetAt(int index) {
 		return childrenOffsets[index];
 	}
 
-	public void setChildrenOffset(int index, int element) {
-		this.childrenOffsets[index] = element;
-	}
-
-	public int getNumChildren() {
-		return numChildren;
-	}
-
-	public void setNumChildren(int numChildren) {
-		this.numChildren = numChildren;
+	/**
+	 * @param index, the obj to set
+	 */
+	public void setChildrenOffsetAt(int index, int offset) {
+		 childrenOffsets[index] = offset;
 	}
 }
