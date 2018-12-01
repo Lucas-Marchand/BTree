@@ -353,6 +353,10 @@ public class BTree {
 	public static void main (String[] args) throws IOException {
 		BTree tree = new BTree(3,"BTree");
 		tree.insert(01010101010);
+		tree.insert(01010101011);
+		tree.insert(01010101111);
+		tree.insert(01010111111);
+		tree.insert(01011111111);
 		tree.closeTree();
 		PrintMetaData();
 		PrintNodeData(8);
