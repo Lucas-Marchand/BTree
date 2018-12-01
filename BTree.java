@@ -16,7 +16,7 @@ import java.io.RandomAccessFile;
  *  
  */
 public class BTree {
-	int rootLocation;
+	static int rootLocation;
 	int keySize;
 	int degree;
 	int sizeOfMetaData = 8;
@@ -37,9 +37,8 @@ public class BTree {
 
 	public void closeTree() throws IOException {
 		rootLocation = (int) file.getFilePointer();
-		BTreeNode root = new BTreeNode(rootLocation, true, degree);
-		WriteMetaData();
 		WriteNodeToFile(root);
+		WriteMetaData();		
 	}
 
 	private static int optimalDegree() {
@@ -76,7 +75,13 @@ public class BTree {
 		System.out.println("Degree: " + file.readInt());
 	}
 	
+	private static void PrintIntData(int location) throws IOException {
+		file.seek(location);
+		System.out.println("Int data is: " + file.readInt());
+	}
+	
 	private static void PrintNodeData(int index) throws IOException {
+		file.seek(index);
 		System.out.println("Node Location: " + file.readInt());
 		System.out.println("number of object in node: " + file.readInt());
 		System.out.println("leaf: " + file.readBoolean());
@@ -295,6 +300,7 @@ public class BTree {
 			
 			//8
 			WriteNodeToFile(x, x.getnodeOffset());
+			
 			//9
 
 		}else {
@@ -347,9 +353,8 @@ public class BTree {
 	public static void main (String[] args) throws IOException {
 		BTree tree = new BTree(3,"BTree");
 		tree.insert(01010101010);
-		tree.insert(01010101011);
 		tree.closeTree();
 		PrintMetaData();
-		PrintNodeData(0);
+		PrintNodeData(8);
 	}
 }
