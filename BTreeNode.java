@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 /**
  * @author Lucas, Lam, Tuan
  *
@@ -9,12 +11,20 @@ public class BTreeNode {
 	private TreeObject[] objects;
 	private int[] childrenOffsets;
 	
-	public BTreeNode(int nodeOffset,int numObjects, Boolean leaf, int degree) {
+	/**
+	 * 
+	 * @param nodeOffset
+	 * @param numObjects
+	 * @param leaf
+	 * @param degree
+	 */
+	public BTreeNode(int nodeOffset, Boolean leaf, int degree) {
 		this.nodeOffset = nodeOffset;
-		this.numObjects = numObjects;
-		leaf = true;
-		objects = new TreeObject[2*degree - 1];
-		childrenOffsets = new int[2*degree];
+		this.numObjects = 0;
+		this.leaf = leaf;
+		objects = new TreeObject[2*degree];
+		childrenOffsets = new int[2*degree+1];
+		Arrays.fill(childrenOffsets, -1);
 	}
 
 	/**
