@@ -18,7 +18,7 @@ import java.io.RandomAccessFile;
 public class BTree {
 	static int rootLocation;
 	int keySize;
-	int degree;
+	static int degree;
 	int sizeOfMetaData = 8;
 	BTreeNode root;
 
@@ -26,7 +26,7 @@ public class BTree {
 
 	public BTree(int degree, String BTreeFile){
 		try {
-			file = new RandomAccessFile("BTreeFile", "rwd"); 	// TODO
+			file = new RandomAccessFile("BTree", "rwd"); 	// TODO
 			this.degree = degree;
 			root = new BTreeNode(sizeOfMetaData,true,degree);
 			file.seek(8);
@@ -163,8 +163,14 @@ public class BTree {
 
 	public static BTreeNode GetNodeFromFile(int location) throws IOException {
 		file.seek(location);
-		BTreeNode bNode = new BTreeNode(file.readInt(),file.readBoolean(),file.readInt());
-
+		
+		int nodeOffset = file.readInt();
+		int numObjects = file.readInt();
+		boolean bleaf = file.readBoolean();
+		
+		BTreeNode bNode = new BTreeNode(nodeOffset,bleaf, degree);
+		bNode.setNumObjects(numObjects);
+		
 		// read Tree Objects from file
 		TreeObject[] objects = new TreeObject[bNode.getNumObjects()];
 		for(TreeObject to : objects) {
@@ -174,21 +180,20 @@ public class BTree {
 		// write all children pointers to file
 		int[] children = bNode.getChildren();
 		for (int child : children ) {
-			child = file.readInt();
+
 		}
-		return null;
+		return bNode;
 	}
 
-	public void SplitChild(int parentOfSplittingNode, int indexToSplitOn) throws IOException {
+	public void SplitChild(int ParentOfSplittingNode, int indexToSplitOn) throws IOException {
 
-
-		BTreeNode x = GetNodeFromFile(parentOfSplittingNode);
+		BTreeNode x = GetNodeFromFile(ParentOfSplittingNode);
 
 		// 1
 		BTreeNode z = new BTreeNode( (int) file.getFilePointer(), true, degree);
 
 		// 2
-		BTreeNode y = GetNodeFromFile(z.getChildOffsetAt(indexToSplitOn));
+		BTreeNode y = GetNodeFromFile(x.getChildOffsetAt(indexToSplitOn));
 
 		// 3
 		z.setLeaf(y.isLeaf());
@@ -205,7 +210,7 @@ public class BTree {
 		// 7
 		if(!y.isLeaf()) {
 			// 8
-			for(int j = 1; j < degree; j++) {
+			for(int j = 1; j <= degree; j++) {
 				// 9
 				z.setChildrenOffsetAt(j, y.getChildOffsetAt(j+degree));
 			}
@@ -215,7 +220,7 @@ public class BTree {
 		y.setNumObjects(degree-1);
 
 		// 11
-		for(int j = x.getNumObjects()+1; j > indexToSplitOn+1; j--) {
+		for(int j = x.getNumObjects()+1; j >= indexToSplitOn+1; j--) {
 			// 12
 			x.setChildrenOffsetAt(j+1, x.getChildOffsetAt(j));
 		}
@@ -224,7 +229,7 @@ public class BTree {
 		x.setChildrenOffsetAt( indexToSplitOn + 1, z.getnodeOffset());
 
 		// 14
-		for (int j = x.getNumObjects(); j > indexToSplitOn; j--) {
+		for (int j = x.getNumObjects(); j >= indexToSplitOn; j--) {
 			// 15
 			x.setObjectAt(j+1, x.getObjectAt(j));
 		}
@@ -236,13 +241,13 @@ public class BTree {
 		x.setNumObjects(x.getNumObjects() + 1);
 
 		// 18
-		WriteNodeToFile(y);
+		WriteNodeToFile(y,y.getnodeOffset());
 
 		// 19
 		WriteNodeToFile(z);
 
 		// 20
-		WriteNodeToFile(x);
+		WriteNodeToFile(x, x.getnodeOffset());
 	}
 
 	public void insert (long k) throws IOException { 	
@@ -251,14 +256,16 @@ public class BTree {
 		//2
 		if (r.getNumObjects()== (2*degree-1)) {
 			//3
-			BTreeNode s = new BTreeNode((int) file.getFilePointer(),false, degree);
+			BTreeNode s = new BTreeNode(-1,true, degree);
 			//4
 			this.root = s;
 			//5	
-			
+			s.setLeaf(false);
 			//6
 			s.setNumObjects(0);
 			//7
+			r.setnodeOffset( (int) file.getFilePointer());
+			WriteNodeToFile(r);
 			s.setChildrenOffsetAt(1, r.getnodeOffset());
 			//8
 			SplitChild(s.getnodeOffset(),1);
@@ -357,6 +364,7 @@ public class BTree {
 		tree.insert(01010101111);
 		tree.insert(01010111111);
 		tree.insert(01011111111);
+		tree.insert(01111111111);
 		tree.closeTree();
 		PrintMetaData();
 		PrintNodeData(8);

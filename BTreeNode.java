@@ -22,8 +22,8 @@ public class BTreeNode {
 		this.nodeOffset = nodeOffset;
 		this.numObjects = 0;
 		this.leaf = leaf;
-		objects = new TreeObject[2*degree];
-		childrenOffsets = new int[2*degree+1];
+		objects = new TreeObject[2*degree+1];
+		childrenOffsets = new int[2*degree+2];
 		Arrays.fill(childrenOffsets, -1);
 	}
 
