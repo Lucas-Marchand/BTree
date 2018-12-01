@@ -25,7 +25,7 @@ public class BTree {
 
 	static RandomAccessFile file;
 
-	public BTree(int degree){
+	public BTree(int degree, String BTreeFile){
 		try {
 			file = new RandomAccessFile("BTreeFile", "rwd"); 	// TODO
 			this.degree = degree;
@@ -56,8 +56,8 @@ public class BTree {
         return (int) Math.floor(optimal);
 	}
 
-	public BTree() {
-		this(optimalDegree());
+	public BTree(String bTreeFile) {
+		this(optimalDegree(), bTreeFile);
 	}
 
 	private void WriteMetaData() throws IOException {
@@ -225,24 +225,23 @@ public class BTree {
 		WriteNodeToFile(x);
 	}
 
-	public void insert (long k) throws IOException { 		// Deleted parameter T
+	public void insert (long k) throws IOException { 	
 		//1
 		BTreeNode r = this.root;
 		//2
 		if (r.getNumObjects()== (2*degree-1)) {
 			//3
-			BTreeNode s = new BTreeNode((int) file.getFilePointer(), numTreeObjects,degree);	// TODO
+			BTreeNode s = new BTreeNode((int) file.getFilePointer(), numTreeObjects,false, degree);
 			//4
 			this.root = s;
-			//5							// TODO
-			boolean l = s.isLeaf();
-			l = false;
+			//5	
+			
 			//6
 			s.setNumObjects(0);
 			//7
 			s.setChildrenOffsetAt(1, r.getnodeOffset());
 			//8
-			SplitNodeInFile(s,1);		// TODO
+			SplitChild(s.getnodeOffset(),1);
 			//9
 			insertNonFull(s, k);	
 		}else {
@@ -251,7 +250,6 @@ public class BTree {
 		}
 	}
 
-	// TODO change frequency
 	public void insertNonFull(BTreeNode x, long k) throws IOException {
 		BTreeNode ch = null;
 
@@ -266,7 +264,13 @@ public class BTree {
 				//5
 				i = i-1;
 			}
-			//6??  
+			//inc Freq
+			if (i >= 1 && x.getObjectAt(i).getKey() == k) {
+				x.getObjectAt(i).incrementFrequency();
+				WriteNodeToFile(x, x.getnodeOffset());
+				return;
+			}
+			//6
 			x.setObjectAt(i+1,new TreeObject(k));
 			//7
 			i = x.getNumObjects()+1;
@@ -279,6 +283,12 @@ public class BTree {
 				//10
 				i = i-1;  
 			}
+			//inc Freq
+			if (i >= 1 && x.getObjectAt(i).getKey() == k) {
+				x.getObjectAt(i).incrementFrequency();
+				WriteNodeToFile(x, x.getnodeOffset());
+				return;
+			}
 			//11
 			i = i+1;
 			//12
@@ -286,8 +296,7 @@ public class BTree {
 			//13
 			if (ch.getNumObjects()==2*degree-1) {
 				//14
-				SplitChild(x, i);				// TODO
-				//15
+				SplitChild(x.getnodeOffset(), i);		
 				if (k>ch.getNumObjects()) {
 					//16
 					i = i+1; 

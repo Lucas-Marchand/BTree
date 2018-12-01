@@ -27,11 +27,12 @@ public class GeneBankCreateBTree {
 			
 			int degree = Integer.parseInt(args[1]);
 			
+			String bTreeFile = args[2]+ ".btree.data." + args[3] + "." + args[1] + ".";
 			BTree tree;
 			if (degree == 0) {
-				tree = new BTree();
+				tree = new BTree(bTreeFile);
 			} else {
-				tree = new BTree(degree);
+				tree = new BTree(degree, bTreeFile);
 			}
 			
 			Scanner fileScan = new Scanner(file);			
@@ -79,6 +80,7 @@ public class GeneBankCreateBTree {
 				if ((line.length() > 5) && (line.substring(0, 6).equals("ORIGIN"))) {
 					seq = true;
 				}
+				tree.closeTree();
 			}
 
 		} catch (FileNotFoundException e) {

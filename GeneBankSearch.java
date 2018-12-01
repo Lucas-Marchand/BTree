@@ -17,9 +17,8 @@ public class GeneBankSearch {
 			RandomAccessFile bTreeFile = new RandomAccessFile(args[1], "rw");
 			bTreeFile.seek(0);
 			int rootOffset = bTreeFile.readInt();
-			bTreeFile.seek(4);
 			int degree = bTreeFile.readInt();
-			BTree tree = new BTree(degree);
+			BTree tree = new BTree(degree, args[1]);
 			
 			BTreeNode root = tree.GetNodeFromFile(rootOffset);
 			
