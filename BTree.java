@@ -370,16 +370,18 @@ public class BTree {
 
 	public static void main(String[] args) throws IOException {
 		BTree tree = new BTree(3, "BTree");
-		tree.insert(1);
-		tree.insert(2);
-		tree.insert(3);
-		tree.insert(4);
-		tree.insert(5);
-		tree.insert(6);
+		for(int i = 1; i <= 18; i++) {
+			tree.insert(i);
+		}
+		tree.insert(19);
 		tree.closeTree();
 		PrintMetaData();
 		PrintRootData();
 		PrintNodeData(8);
 		PrintNodeData(101);
+		PrintNodeData(194);
+		PrintNodeData(287);
+		PrintNodeData(380);
+		PrintNodeData(473);
 	}
 }
