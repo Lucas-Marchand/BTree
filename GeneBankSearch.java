@@ -18,9 +18,9 @@ public class GeneBankSearch {
 			bTreeFile.seek(0);
 			int rootOffset = bTreeFile.readInt();
 			int degree = bTreeFile.readInt();
-			BTree tree = new BTree(degree, args[1]);
+			BTree tree = new BTree(degree, args[1],"");
 			
-			BTreeNode root = tree.GetNodeFromFile(rootOffset);
+			BTreeNode root = tree.ReadNodeFromFile(rootOffset);
 			
 			Scanner fileScan = new Scanner(file);			
 			while (fileScan.hasNextLine()) {

@@ -1,7 +1,9 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.Arrays;
 
 /*
  *  BTree file Layout
@@ -16,33 +18,37 @@ import java.io.RandomAccessFile;
  *  
  */
 public class BTree {
-	static int rootLocation;
-	int keySize;
 	static int degree;
 	int sizeOfMetaData = 8;
 	static BTreeNode root;
 
 	static RandomAccessFile file;
+	static FileOutputStream fos;
 
-	public BTree(int degree, String BTreeFile) {
+	public BTree(int t, String BTreeFile, String dumpfile) {
 		try {
-			file = new RandomAccessFile("BTree", "rwd"); // TODO
-			this.degree = degree;
-			root = new BTreeNode(sizeOfMetaData, true, degree);
-			file.seek(8);
+			file = new RandomAccessFile(BTreeFile, "rwd");
+			fos = new FileOutputStream(dumpfile);
+			degree = t;
+			file.write(new byte[8]);
+			root = new BTreeNode((int) file.length(), 0, true, degree);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	public void closeTree() throws IOException {
-		rootLocation = (int) file.getFilePointer();
-		root.setnodeOffset(rootLocation);
-		WriteNodeToFile(root);
-		WriteMetaData();
+		// write meta data
+		file.seek(0);
+
+		// locaton of root
+		file.writeInt(root.getnodeOffset());
+
+		// the degree of the BTree
+		file.writeInt(degree);
 	}
 
-	private static int optimalDegree() {
+	private static int optimalDegree() { // TODO
 
 		double optimal = 4096;
 		int Pointer = 4;
@@ -56,76 +62,73 @@ public class BTree {
 		return (int) Math.floor(optimal);
 	}
 
-	public BTree(String bTreeFile) {
-		this(optimalDegree(), bTreeFile);
-	}
-
-	private void WriteMetaData() throws IOException {
-		file.seek(0);
-
-		// locaton of root
-		file.writeInt(rootLocation);
-
-		// the degree of the BTree
-		file.writeInt(degree);
+	public BTree(String bTreeFile, String dumpfile) {
+		this(optimalDegree(), bTreeFile, dumpfile);
 	}
 
 	private static void PrintMetaData() throws IOException {
 		file.seek(0);
-		System.out.println("Root Location: " + file.readInt());
+		System.out.println("Root location: " + file.readInt());
 		System.out.println("Degree: " + file.readInt());
 	}
 
-	private static void PrintIntData(int location) throws IOException {
-		file.seek(location);
-		System.out.println("Int data is: " + file.readInt());
-	}
+//	private static void PrintNodeData(int offset) throws IOException {
+//		file.seek(offset);
+//		System.out.println("Node Location: " + file.readInt());
+//		int numObjects = file.readInt();
+//		System.out.println("number of object in node: " + numObjects);
+//		System.out.println("leaf: " + file.readBoolean());
+//		for (int i = 1; i <= numObjects; i++) {
+//			long key = file.readLong();
+//			int frequency = file.readInt();
+//			System.out.println("Object " + i + ": " + key + ", " + frequency);
+//		}
+//		
+//		file.skipBytes(((2*degree-1) - numObjects)*12);
+//		
+//		for (int i = 1; i <= numObjects+1; i++) {
+//			int childOffset = file.readInt();
+//			System.out.println("Child offset at " + i + ": " + childOffset);
+//		}
+//	}
+//	
+//	private static void PrintNodeData(BTreeNode x) throws IOException {
+//		System.out.println("Node Location: " + x.getnodeOffset());
+//		System.out.println("number of object in node: " + x.getNumObjects());
+//		System.out.println("leaf: " + x.isLeaf());
+//		for (int i = 1; i <= x.getNumObjects(); i++) {
+//			TreeObject obj = x.getObjectAt(i);
+//			System.out.println("Object " + i + ": " + obj.getKey() + ", " + obj.getFrequency());
+//		}
+//		
+//		for (int i = 1; i <= x.getNumObjects()+1; i++) {
+//			System.out.println("Child offset at " + i + ": " + x.getChildOffsetAt(i));
+//		}
+//	}
 
-	private static void PrintRootData() throws IOException {
-		BTreeNode node = GetNodeFromFile(rootLocation);
-		node.toString();
-	}
-	
-	private static void PrintNodeData(int index) throws IOException {
-		BTreeNode node = GetNodeFromFile(index);
-		node.toString();
-	}
-
-	private void WriteNodeToFile(BTreeNode node) throws IOException {
-		// long Location
-		file.writeInt((int) file.getFilePointer());
-
-		// int num Objects
-		file.writeInt(node.getNumObjects());
-
-		// Boolean leaf
-		file.writeBoolean(node.isLeaf());
-
-		// Write Tree Objects to file
-		for (int i = 1; i <= node.getNumObjects(); i++) {
-			if (node.getObjectAt(i) != null) {
-				file.writeLong(node.getObjectAt(i).getKey());
-				file.writeInt(node.getObjectAt(i).getFrequency());
-			} else {
-				file.skipBytes(12);
+	public static void inorderTraversal(BTreeNode x) throws IOException { // TODO
+		if (x.isLeaf()) {
+			for (int i = 1; i <= x.getNumObjects(); i++) {
+				TreeObject obj = x.getObjectAt(i);
+				System.out.println(obj.getKey() + ": " + obj.getFrequency());
 			}
+			return;
 		}
 
-		// write all children pointers to file
-		for (int i = 1; i <= node.getNumObjects()+1; i++) {
-			if (node.getChildOffsetAt(i) > 0) {
-				file.writeInt(node.getChildOffsetAt(i));
-			} else {
-				file.writeInt(-1);
-			}
+		for (int i = 1; i <= x.getNumObjects(); i++) {
+			inorderTraversal(ReadNodeFromFile(x.getChildOffsetAt(i)));
+			TreeObject obj = x.getObjectAt(i);
+			System.out.println(obj.getKey() + ": " + obj.getFrequency());
 		}
+
+		inorderTraversal(ReadNodeFromFile(x.getChildOffsetAt(x.getNumObjects() + 1)));
 	}
 
 	private void WriteNodeToFile(BTreeNode node, int location) throws IOException {
 		file.seek(location);
 
-		// long Location
-		file.writeInt((int) file.getFilePointer());
+		// int nodeOffset
+		file.writeInt(node.getnodeOffset());
 
 		// int num Objects
 		file.writeInt(node.getNumObjects());
@@ -133,65 +136,75 @@ public class BTree {
 		// Boolean leaf
 		file.writeBoolean(node.isLeaf());
 
-		// Write Tree Objects to file
-		for (int i = 1; i <= node.getNumObjects(); i++) {
-			if (node.getObjectAt(i) != null) {
-				file.writeLong(node.getObjectAt(i).getKey());
-				file.writeInt(node.getObjectAt(i).getFrequency());
-			} else {
-				file.skipBytes(12);
+		if (node.getNumObjects() == 0) {
+			file.write(new byte[12 * (2 * degree - 1) + 4 * (2 * degree)]);
+			return;
+		} else {
+			// Write Tree Objects to file
+			for (int i = 1; i <= 2 * degree - 1; i++) {
+				if (node.getObjectAt(i) != null) {
+					file.writeLong(node.getObjectAt(i).getKey());
+					file.writeInt(node.getObjectAt(i).getFrequency());
+				} else {
+					file.write(new byte[12]);
+				}
 			}
 		}
 
-		// write all children pointers to file
-		for (int i = 1; i <= node.getNumObjects() + 1; i++) {
-			if (node.getChildOffsetAt(i) > 0) {
-				file.writeInt(node.getChildOffsetAt(i));
-			} else {
-				file.writeInt(-1);
+		if (node.isLeaf()) {
+			file.write(new byte[4 * 2 * degree]);
+		} else {
+			// write all children pointers to file
+			for (int i = 1; i <= 2 * degree; i++) {
+				if (node.getChildOffsetAt(i) > 0) {
+					file.writeInt(node.getChildOffsetAt(i));
+				} else {
+					file.writeInt(-1);
+				}
 			}
 		}
 	}
 
-	// recursive add method to add to a BTree
-	public void add(long data, int location) {
-
-	}
-
-	private int CalcNumTreeObjects(int deg) {
-		return (2 * deg - 1);
-	}
-
-	public static BTreeNode GetNodeFromFile(int location) throws IOException {
+	public static BTreeNode ReadNodeFromFile(int location) throws IOException {
 		file.seek(location);
 
 		int nodeOffset = file.readInt();
 		int numObjects = file.readInt();
 		boolean bleaf = file.readBoolean();
 
-		BTreeNode bNode = new BTreeNode(nodeOffset, bleaf, degree);
-		bNode.setNumObjects(numObjects);
+		BTreeNode bNode = new BTreeNode(nodeOffset, numObjects, bleaf, degree);
 
-		// read Tree Objects from file
-		for (int i = 1; i <= bNode.getNumObjects(); i++) {
-			bNode.setObjectAt(i, new TreeObject(file.readLong(), file.readInt()));
+		if (numObjects != 0) {
+			// read Tree Objects from file
+			for (int i = 1; i <= numObjects; i++) {
+				long key = file.readLong();
+				int frequency = file.readInt();
+				bNode.setObjectAt(i, new TreeObject(key, frequency));
+			}
 		}
-		
-		// read in the child pointers
-		for (int i = 1; i <= bNode.getNumObjects()+1; i++) {
-			bNode.setChildrenOffsetAt(i, file.readInt());
+
+		file.skipBytes(((2 * degree - 1) - numObjects) * 12);
+
+		if (!bleaf) {
+			// read childOffsets from file
+			for (int i = 1; i <= numObjects + 1; i++) {
+				int childOffset = file.readInt();
+				bNode.setChildrenOffsetAt(i, childOffset);
+			}
 		}
+
+		file.skipBytes(((2 * degree) - (numObjects + 1)) * 4);
 
 		return bNode;
 	}
 
-	public void SplitChild(BTreeNode x, int indexToSplitOn) throws IOException {
+	private void SplitChild(BTreeNode x, int indexToSplitOn) throws IOException {
 
 		// 1
-		BTreeNode z = new BTreeNode((int) file.getFilePointer(), true, degree);
+		BTreeNode z = new BTreeNode((int) file.length(), 0, true, degree);
 
 		// 2
-		BTreeNode y = GetNodeFromFile(x.getChildOffsetAt(indexToSplitOn));
+		BTreeNode y = ReadNodeFromFile(x.getChildOffsetAt(indexToSplitOn));
 
 		// 3
 		z.setLeaf(y.isLeaf());
@@ -211,7 +224,6 @@ public class BTree {
 			for (int j = 1; j <= degree; j++) {
 				// 9
 				z.setChildrenOffsetAt(j, y.getChildOffsetAt(j + degree));
-				y.setObjectAt(j+degree, null);
 			}
 		}
 
@@ -243,51 +255,46 @@ public class BTree {
 		WriteNodeToFile(y, y.getnodeOffset());
 
 		// 19
-		WriteNodeToFile(z,z.getnodeOffset());
+		WriteNodeToFile(z, z.getnodeOffset());
 
 		// 20
-		if(!x.equals(root)) {
-			WriteNodeToFile(x, x.getnodeOffset());
-		}
+		WriteNodeToFile(x, x.getnodeOffset());
 	}
 
 	public void insert(long k) throws IOException {
-		// 1
-		BTreeNode r = this.root;
-
-		// 2
-		if (r.getNumObjects() == (2 * degree - 1)) {
-
-			// 3
-			BTreeNode s = new BTreeNode(-1, true, degree);
-
-			// 4
-			this.root = s;
-
-			// 5
-			s.setLeaf(false);
-
-			// 6
-			s.setNumObjects(0);
-
-			// 7
-			r.setnodeOffset((int) file.getFilePointer());
-			WriteNodeToFile(r);
-			s.setChildrenOffsetAt(1, r.getnodeOffset());
-
-			// 8
-			SplitChild(s,1);
-
-			// 9
-			insertNonFull(s, k);
+		// increment frequency if k exists in BTree then exit
+		if (incFreq(this.root, k)) {
+			return;
 		} else {
-
-			// 10
-			insertNonFull(r, k);
+			// 1
+			BTreeNode r = this.root;
+			// 2
+			if (r.getNumObjects() == (2 * degree - 1)) {
+				// 3
+				BTreeNode s = new BTreeNode((int) file.length(), 0, true, degree);
+				// 4
+				this.root = s;
+				// 5
+				s.setLeaf(false);
+				// 6
+				s.setNumObjects(0);
+				// 7
+				s.setChildrenOffsetAt(1, r.getnodeOffset());
+				// write s to file
+				WriteNodeToFile(s, s.getnodeOffset());
+				// 8
+				SplitChild(s, 1);
+				// 9
+				insertNonFull(s, k);
+			} else {
+				// 10
+				insertNonFull(r, k);
+			}
 		}
 	}
 
-	public void insertNonFull(BTreeNode x, long k) throws IOException {
+	private void insertNonFull(BTreeNode x, long k) throws IOException {
+
 		BTreeNode ch = null;
 
 		// 1
@@ -302,13 +309,6 @@ public class BTree {
 				i--;
 			}
 
-			// inc Freq
-			if (i >= 1 && x.getObjectAt(i).getKey() == k) {
-				x.getObjectAt(i).incrementFrequency();
-				WriteNodeToFile(x, x.getnodeOffset());
-				return;
-			}
-
 			// 6
 			x.setObjectAt(i + 1, new TreeObject(k));
 
@@ -316,41 +316,32 @@ public class BTree {
 			x.setNumObjects(x.getNumObjects() + 1);
 
 			// 8
-			if (!root.equals(x)) {
-				WriteNodeToFile(x, x.getnodeOffset());
-			}
+			WriteNodeToFile(x, x.getnodeOffset());
+
 			// 9
 
 		} else {
 			while (i >= 1 && k < x.getObjectAt(i).getKey()) {
 				// 10
-				i--;
-			}
-			// inc Freq
-			if (x.getObjectAt(i).getKey() == k) {
-				x.getObjectAt(i).incrementFrequency();
-				if(!x.equals(root)) {
-					WriteNodeToFile(x, x.getnodeOffset());
-				}
-				return;
+				i = i - 1;
 			}
 			// 11
-			i++;
+			i = i + 1;
 			// 12
-			ch = GetNodeFromFile(x.getChildOffsetAt(i));
+			ch = ReadNodeFromFile(x.getChildOffsetAt(i));
 			// 13
 			if (ch.getNumObjects() == 2 * degree - 1) {
 				// 14
 				SplitChild(x, i);
-				if (k > ch.getNumObjects()) {
+				// 15
+				if (k > x.getObjectAt(i).getKey()) {
 					// 16
 					i = i + 1;
 				}
 			}
 			// 17
-			ch = GetNodeFromFile(x.getChildOffsetAt(i));
+			ch = ReadNodeFromFile(x.getChildOffsetAt(i));
 			insertNonFull(ch, k);
-
 		}
 	}
 
@@ -364,24 +355,66 @@ public class BTree {
 		} else if (x.isLeaf()) {
 			return null;
 		} else {
-			return search(GetNodeFromFile(x.getChildOffsetAt(i)), key);
+			return search(ReadNodeFromFile(x.getChildOffsetAt(i)), key);
+		}
+	}
+
+	private Boolean incFreq(BTreeNode x, long key) throws IOException {
+		int i = 1;
+		while (i <= x.getNumObjects() && key > x.getObjectAt(i).getKey()) {
+			i++;
+		}
+		if (i <= x.getNumObjects() && key == x.getObjectAt(i).getKey()) {
+			x.getObjectAt(i).incrementFrequency();
+			WriteNodeToFile(x, x.getnodeOffset());
+			return true;
+		} else if (x.isLeaf()) {
+			return false;
+		} else {
+			return incFreq(ReadNodeFromFile(x.getChildOffsetAt(i)), key);
 		}
 	}
 
 	public static void main(String[] args) throws IOException {
-		BTree tree = new BTree(3, "BTree");
-		for(int i = 1; i <= 18; i++) {
+		File file = new File("BTree");
+		if (file.exists()) {
+			file.delete();
+			file.createNewFile();
+		}
+
+		BTree tree = new BTree(3, "BTree", "Dump");
+
+		for (int i = 1; i <= 500; i++) {
 			tree.insert(i);
 		}
-		tree.insert(19);
+
 		tree.closeTree();
-		PrintMetaData();
-		PrintRootData();
-		PrintNodeData(8);
-		PrintNodeData(101);
-		PrintNodeData(194);
-		PrintNodeData(287);
-		PrintNodeData(380);
-		PrintNodeData(473);
+		BTree.PrintMetaData();
+		BTree.inorderTraversal(root);
+	}
+
+	public static void inorderPrint(BTreeNode x) throws IOException { // TODO
+		if (x.isLeaf()) {
+			for (int i = 1; i <= x.getNumObjects(); i++) {
+				TreeObject obj = x.getObjectAt(i);
+				byte[] sequence = (GeneBankCreateBTree.decodeLongValue(obj.getKey()) + ": " + obj.getFrequency() + "\n").getBytes();
+				fos.write(sequence);
+			}
+			return;
+		}
+
+		for (int i = 1; i <= x.getNumObjects(); i++) {
+			inorderPrint(ReadNodeFromFile(x.getChildOffsetAt(i)));
+			TreeObject obj = x.getObjectAt(i);
+			byte[] sequence = (GeneBankCreateBTree.decodeLongValue(obj.getKey()) + ": " + obj.getFrequency() + "\n").getBytes();
+			fos.write(sequence);
+		}
+
+		inorderPrint(ReadNodeFromFile(x.getChildOffsetAt(x.getNumObjects() + 1)));
+	}
+
+	public void DumpFile() throws IOException {
+		// TODO Auto-generated method stub
+		inorderPrint(root);
 	}
 }

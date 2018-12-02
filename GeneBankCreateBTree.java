@@ -9,6 +9,7 @@ import java.util.Scanner;
  */
 public class GeneBankCreateBTree {
 
+	static int seqLength;
 	/**
 	 * @param args
 	 */
@@ -18,7 +19,7 @@ public class GeneBankCreateBTree {
 		//Cache
 		//Debug level
 		
-		int seqLength = Integer.parseInt(args[3]);
+		seqLength = Integer.parseInt(args[3]);
 		boolean seq = false;
 		String leftover = "";
 
@@ -27,12 +28,13 @@ public class GeneBankCreateBTree {
 			
 			int degree = Integer.parseInt(args[1]);
 			
-			String bTreeFile = args[2]+ ".btree.data." + args[3] + "." + args[1] + ".";
+			String bTreeFile = args[2]+ ".btree.data." + args[3] + "." + args[1] + "." + degree;
+			String bTreeDump = args[2]+ ".btree.dump." + args[3];
 			BTree tree;
 			if (degree == 0) {
-				tree = new BTree(bTreeFile);
+				tree = new BTree(bTreeFile, bTreeDump);
 			} else {
-				tree = new BTree(degree, bTreeFile);
+				tree = new BTree(degree, bTreeFile, bTreeDump);
 			}
 			
 			Scanner fileScan = new Scanner(file);			
@@ -82,12 +84,44 @@ public class GeneBankCreateBTree {
 				}
 				tree.closeTree();
 			}
-
+			tree.DumpFile();
 		} catch (FileNotFoundException e) {
 			System.out.println("The gbk file does not exist.");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static String decodeLongValue(Long key) {
+		String seq = "";
+		String bin = Long.toBinaryString(key);
+		String code = "";
+
+		while (bin.length() < seqLength * 2) {
+			bin = "0" + bin;
+		}
+
+		for (int i = 1; i <= seqLength; i++) {
+			String sub = bin.substring(bin.length() - 2 * i, bin.length() - 2 * (i - 1));
+			if (sub.equals("00")) {
+				code = "a";
+			} else {
+				if (sub.equals("11")) {
+					code = "t";
+				} else {
+					if (sub.equals("01")) {
+						code = "c";
+					} else {
+						if (sub.equals("10")) {
+							code = "g";
+						}
+					}
+				}
+			}
+			seq = code + seq;
+		}
+
+		return seq;
 	}
 
 }
