@@ -1,12 +1,8 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.Scanner;
+import java.io.IOException;
 
-/**
- * @author Tuan, Lam
- *
- */
 public class GeneBankCreateBTree {
 
 	static int seqLength;
@@ -14,11 +10,7 @@ public class GeneBankCreateBTree {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		
-		//TODO
-		//Cache
-		//Debug level
-		
+
 		seqLength = Integer.parseInt(args[3]);
 		boolean seq = false;
 		String leftover = "";
@@ -42,6 +34,7 @@ public class GeneBankCreateBTree {
 				String line = fileScan.nextLine();	
 				if ((line.length() > 1) && (line.substring(0, 2).equals("//"))) {
 					seq = false;
+					leftover = "";
 				}
 				if (seq) {
 					String seqLine = line.substring(line.lastIndexOf("1") + 2, line.length());
@@ -84,7 +77,9 @@ public class GeneBankCreateBTree {
 				}
 				tree.closeTree();
 			}
-			tree.DumpFile();
+			if (args[5].equals("1")) {
+				tree.DumpFile();
+			}
 		} catch (FileNotFoundException e) {
 			System.out.println("The gbk file does not exist.");
 		} catch (IOException e) {

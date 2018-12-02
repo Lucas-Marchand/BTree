@@ -8,6 +8,12 @@ import java.util.Scanner;
  * @author Lam, Tuan
  *
  */
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.util.Scanner;
+
 public class GeneBankSearch {
 
 	public static void main(String[] args) throws IOException {
@@ -20,7 +26,7 @@ public class GeneBankSearch {
 			int degree = bTreeFile.readInt();
 			BTree tree = new BTree(degree, args[1],"");
 			
-			BTreeNode root = tree.ReadNodeFromFile(rootOffset);
+			BTreeNode root = BTree.ReadNodeFromFile(rootOffset);
 			
 			Scanner fileScan = new Scanner(file);			
 			while (fileScan.hasNextLine()) {
