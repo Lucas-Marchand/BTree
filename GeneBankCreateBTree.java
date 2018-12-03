@@ -23,12 +23,20 @@ public class GeneBankCreateBTree {
 			String bTreeFile = args[2]+ ".btree.data." + args[3] + "." + args[1] + "." + degree;
 			String bTreeDump = args[2]+ ".btree.dump." + args[3];
 			BTree tree;
-			if (degree == 0) {
-				tree = new BTree(bTreeFile, bTreeDump);
+			if (args.length > 5) {
+				if (degree == 0) {
+					tree = new BTree(bTreeFile, bTreeDump);
+				} else {
+					tree = new BTree(degree, bTreeFile, bTreeDump);
+				} 
 			} else {
-				tree = new BTree(degree, bTreeFile, bTreeDump);
+				if (degree == 0) {
+					tree = new BTree(bTreeFile);
+				} else {
+					tree = new BTree(degree, bTreeFile);
+				} 
 			}
-			
+
 			Scanner fileScan = new Scanner(file);			
 			while (fileScan.hasNextLine()) {
 				String line = fileScan.nextLine();	
@@ -75,11 +83,12 @@ public class GeneBankCreateBTree {
 				if ((line.length() > 5) && (line.substring(0, 6).equals("ORIGIN"))) {
 					seq = true;
 				}
-				tree.closeTree();
 			}
-			if (args[5].equals("1")) {
+			tree.closeTree();
+			if (args.length > 5 && args[5].equals("1")) {
 				tree.DumpFile();
 			}
+			fileScan.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("The gbk file does not exist.");
 		} catch (IOException e) {

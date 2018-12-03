@@ -4,16 +4,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Scanner;
 
-/**
- * @author Lam, Tuan
- *
- */
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.util.Scanner;
-
 public class GeneBankSearch {
 
 	public static void main(String[] args) throws IOException {
@@ -24,7 +14,7 @@ public class GeneBankSearch {
 			bTreeFile.seek(0);
 			int rootOffset = bTreeFile.readInt();
 			int degree = bTreeFile.readInt();
-			BTree tree = new BTree(degree, args[1],"");
+			BTree tree = new BTree(degree, args[1]);
 			
 			BTreeNode root = BTree.ReadNodeFromFile(rootOffset);
 			
@@ -58,10 +48,10 @@ public class GeneBankSearch {
 				TreeObject retVal = tree.search(root, keyVal);
 				if (retVal != null) {
 					System.out.println(query + ": " + retVal.getFrequency());
-				} else {
-					System.out.println(query + ": 0");
 				}
 			}
+			fileScan.close();
+			bTreeFile.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("The gbk file does not exist.");
 		}

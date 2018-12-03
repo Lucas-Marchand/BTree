@@ -33,6 +33,17 @@ public class BTree {
 			e.printStackTrace();
 		}
 	}
+	
+	public BTree(int t, String BTreeFile) {
+		try {
+			file = new RandomAccessFile(BTreeFile, "rwd");
+			degree = t;
+			file.write(new byte[8]);
+			root = new BTreeNode((int) file.length(), 0, true, degree);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	public void closeTree() throws IOException {
 		// write meta data
@@ -47,21 +58,25 @@ public class BTree {
 
 	private static int optimalDegree() { 
 
-//		Disk block = 4096
-//		BTree meta-data = int root location (4) + int degree (4) = 8
-//		BTreeNode meta-data = int nodeOffset (4) + int numObject (4) + Boolean leaf (1) = 9
-//		TreeObject = long key (8) + int frequency (4) = 12
-//		childOffset = int = 4
-//		
-//		8 + 9 + (2t-1)(12) + (2t)(4) <= 4096
-//		=> 32t <= 4091
-//		=> t = 127
-		
-		return 127;
+		double optimal = 4096;
+		int Pointer = 4;
+ 		int Object = 12;
+ 		int Metadata = 12;
+ 
+ 		optimal += Object;
+ 		optimal -= Pointer;
+ 		optimal -= Metadata;
+ 		optimal /= (2 * (Object + Pointer));
+ 		
+		return (int) Math.floor(optimal);
 	}
 
 	public BTree(String bTreeFile, String dumpfile) {
 		this(optimalDegree(), bTreeFile, dumpfile);
+	}
+	
+	public BTree(String bTreeFile) {
+		this(optimalDegree(), bTreeFile);
 	}
 
 	private void WriteNodeToFile(BTreeNode node, int location) throws IOException {
@@ -203,17 +218,17 @@ public class BTree {
 
 	public void insert(long k) throws IOException {
 		// increment frequency if k exists in BTree then exit
-		if (incFreq(root, k)) {
+		if (incFreq(this.root, k)) {
 			return;
 		} else {
 			// 1
-			BTreeNode r = root;
+			BTreeNode r = this.root;
 			// 2
 			if (r.getNumObjects() == (2 * degree - 1)) {
 				// 3
 				BTreeNode s = new BTreeNode((int) file.length(), 0, true, degree);
 				// 4
-				root = s;
+				this.root = s;
 				// 5
 				s.setLeaf(false);
 				// 6
