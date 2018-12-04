@@ -57,18 +57,8 @@ public class BTree {
 	}
 
 	private static int optimalDegree() { 
-
-		double optimal = 4096;
-		int Pointer = 4;
- 		int Object = 12;
- 		int Metadata = 12;
- 
- 		optimal += Object;
- 		optimal -= Pointer;
- 		optimal -= Metadata;
- 		optimal /= (2 * (Object + Pointer));
- 		
-		return (int) Math.floor(optimal);
+		double diskBlock = 4096;
+		return (int) (diskBlock / 32);
 	}
 
 	public BTree(String bTreeFile, String dumpfile) {
