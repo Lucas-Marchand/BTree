@@ -18,28 +18,42 @@ public class BTree {
 	static int degree;
 	int sizeOfMetaData = 8;
 	static BTreeNode root;
+	Cache cache;
+	boolean usecache = false;
 
 	static RandomAccessFile file;
 	static FileOutputStream fos;
 
-	public BTree(int t, String BTreeFile, String dumpfile) {
+	public BTree(int t, String BTreeFile, String dumpfile, int cachesize) {
 		try {
 			file = new RandomAccessFile(BTreeFile, "rwd");
 			fos = new FileOutputStream(dumpfile);
 			degree = t;
 			file.write(new byte[8]);
 			root = new BTreeNode((int) file.length(), 0, true, degree);
+			
+			if (cachesize > 0)	{
+				cache = new Cache(cachesize);
+				cache.addObject(root);
+				usecache = true;
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public BTree(int t, String BTreeFile) {
+	public BTree(int t, String BTreeFile, int cachesize) {
 		try {
 			file = new RandomAccessFile(BTreeFile, "rwd");
 			degree = t;
 			file.write(new byte[8]);
 			root = new BTreeNode((int) file.length(), 0, true, degree);
+			
+			if (cachesize > 0) {
+				cache = new Cache(cachesize);
+				cache.addObject(root);
+				usecache = true;
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -57,16 +71,26 @@ public class BTree {
 	}
 
 	private static int optimalDegree() { 
-		double diskBlock = 4096;
-		return (int) (diskBlock / 32);
+
+		double optimal = 4096;
+		int Pointer = 4;
+ 		int Object = 12;
+ 		int Metadata = 12;
+ 
+ 		optimal += Object;
+ 		optimal -= Pointer;
+ 		optimal -= Metadata;
+ 		optimal /= (2 * (Object + Pointer));
+ 		
+		return (int) Math.floor(optimal);
 	}
 
-	public BTree(String bTreeFile, String dumpfile) {
-		this(optimalDegree(), bTreeFile, dumpfile);
+	public BTree(String bTreeFile, String dumpfile, int cachesize) {
+		this(optimalDegree(), bTreeFile, dumpfile, cachesize);
 	}
 	
-	public BTree(String bTreeFile) {
-		this(optimalDegree(), bTreeFile);
+	public BTree(String bTreeFile, int cachesize) {
+		this(optimalDegree(), bTreeFile, cachesize);
 	}
 
 	private void WriteNodeToFile(BTreeNode node, int location) throws IOException {
@@ -149,7 +173,13 @@ public class BTree {
 		BTreeNode z = new BTreeNode((int) file.length(), 0, true, degree);
 
 		// 2
-		BTreeNode y = ReadNodeFromFile(x.getChildOffsetAt(indexToSplitOn));
+		BTreeNode y = null;
+		if (usecache == true) {
+			y = cache.getObject(x.getChildOffsetAt(indexToSplitOn));
+		}
+		if (y == null) {
+			y = ReadNodeFromFile(x.getChildOffsetAt(indexToSplitOn));
+		}
 
 		// 3
 		z.setLeaf(y.isLeaf());
@@ -183,6 +213,8 @@ public class BTree {
 
 		// 13
 		x.setChildrenOffsetAt(indexToSplitOn + 1, z.getnodeOffset());
+		if (usecache == true)
+			cache.addObject(z);
 
 		// 14
 		for (int j = x.getNumObjects(); j >= indexToSplitOn; j--) {
@@ -225,6 +257,8 @@ public class BTree {
 				s.setNumObjects(0);
 				// 7
 				s.setChildrenOffsetAt(1, r.getnodeOffset());
+				if (usecache == true)
+					cache.addObject(s);
 				// write s to file
 				WriteNodeToFile(s, s.getnodeOffset());
 				// 8
@@ -273,7 +307,12 @@ public class BTree {
 			// 11
 			i = i + 1;
 			// 12
-			ch = ReadNodeFromFile(x.getChildOffsetAt(i));
+			if (usecache == true) {
+				ch = cache.getObject(x.getChildOffsetAt(i));
+			}
+			if (ch == null) {
+				ch = ReadNodeFromFile(x.getChildOffsetAt(i));
+			}
 			// 13
 			if (ch.getNumObjects() == 2 * degree - 1) {
 				// 14
@@ -285,7 +324,13 @@ public class BTree {
 				}
 			}
 			// 17
-			ch = ReadNodeFromFile(x.getChildOffsetAt(i));
+			ch = null;
+			if (usecache == true) {
+				ch = cache.getObject(x.getChildOffsetAt(i));
+			}
+			if (ch == null) {
+				ch = ReadNodeFromFile(x.getChildOffsetAt(i));
+			}
 			insertNonFull(ch, k);
 		}
 	}
@@ -300,7 +345,14 @@ public class BTree {
 		} else if (x.isLeaf()) {
 			return null;
 		} else {
-			return search(ReadNodeFromFile(x.getChildOffsetAt(i)), key);
+			BTreeNode ret = null;
+			if (usecache == true) {
+				ret = cache.getObject(x.getChildOffsetAt(i));
+			}
+			if (ret == null){
+				ret = ReadNodeFromFile(x.getChildOffsetAt(i));
+			}
+			return search(ret, key);
 		}
 	}
 
@@ -316,7 +368,14 @@ public class BTree {
 		} else if (x.isLeaf()) {
 			return false;
 		} else {
-			return incFreq(ReadNodeFromFile(x.getChildOffsetAt(i)), key);
+			BTreeNode ret = null;
+			if (usecache == true) {
+				ret = cache.getObject(x.getChildOffsetAt(i));
+			}
+			if (ret == null) {
+				ret = ReadNodeFromFile(x.getChildOffsetAt(i));
+			}
+			return incFreq(ret, key);
 		}
 	}
 
