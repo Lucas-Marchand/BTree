@@ -8,13 +8,21 @@ public class GeneBankSearch {
 
 	public static void main(String[] args) throws IOException {
 		File file = new File(args[2]);
+		int cachesize = 0;
 		try {
+			if (Integer.parseInt(args[0]) == 1) {
+				if (Integer.parseInt(args[3]) <= 0) {
+					System.err.println("Cache size must be greater than 0");
+					System.exit(1);
+				}
+				cachesize = Integer.parseInt(args[3]);
+			}
 						
 			RandomAccessFile bTreeFile = new RandomAccessFile(args[1], "rw");
 			bTreeFile.seek(0);
 			int rootOffset = bTreeFile.readInt();
 			int degree = bTreeFile.readInt();
-			BTree tree = new BTree(degree, args[1]);
+			BTree tree = new BTree(degree, args[1], cachesize);
 			
 			BTreeNode root = BTree.ReadNodeFromFile(rootOffset);
 			
@@ -50,6 +58,8 @@ public class GeneBankSearch {
 					System.out.println(query + ": " + retVal.getFrequency());
 				}
 			}
+			tree.root = root;
+			tree.closeTree();
 			fileScan.close();
 			bTreeFile.close();
 		} catch (FileNotFoundException e) {

@@ -180,6 +180,7 @@ public class BTree {
 		if (y == null) {
 			y = ReadNodeFromFile(x.getChildOffsetAt(indexToSplitOn));
 		}
+
 		// 3
 		z.setLeaf(y.isLeaf());
 
@@ -264,7 +265,6 @@ public class BTree {
 				SplitChild(s, 1);
 				// 9
 				insertNonFull(s, k);
-				
 			} else {
 				// 10
 				insertNonFull(r, k);
@@ -324,6 +324,7 @@ public class BTree {
 				}
 			}
 			// 17
+			ch = null;
 			if (usecache == true) {
 				ch = cache.getObject(x.getChildOffsetAt(i));
 			}

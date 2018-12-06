@@ -4,7 +4,7 @@ import java.util.Scanner;
 import java.io.IOException;
 
 public class GeneBankCreateBTree {
-
+	
 	static int seqLength;
 	/**
 	 * @param args
@@ -13,27 +13,35 @@ public class GeneBankCreateBTree {
 
 		seqLength = Integer.parseInt(args[3]);
 		boolean seq = false;
+		int cachesize = 0;
 		String leftover = "";
 
 		File file = new File(args[2]);
 		try {
+			if (Integer.parseInt(args[0]) == 1) {
+				if (Integer.parseInt(args[4]) <= 0) {
+					System.err.println("Cache size must be greater than 0");
+					System.exit(1);
+				}
+				cachesize = Integer.parseInt(args[4]);
+			}
 			
 			int degree = Integer.parseInt(args[1]);
 			
 			String bTreeFile = args[2]+ ".btree.data." + args[3] + "." + args[1] + "." + degree;
 			String bTreeDump = args[2]+ ".btree.dump." + args[3];
 			BTree tree;
-			if (args.length > 5) {
+			if (args.length > 5 && Integer.parseInt(args[5]) == 1) {
 				if (degree == 0) {
-					tree = new BTree(bTreeFile, bTreeDump);
+					tree = new BTree(bTreeFile, bTreeDump, cachesize);
 				} else {
-					tree = new BTree(degree, bTreeFile, bTreeDump);
+					tree = new BTree(degree, bTreeFile, bTreeDump, cachesize);
 				} 
 			} else {
 				if (degree == 0) {
-					tree = new BTree(bTreeFile);
+					tree = new BTree(bTreeFile, cachesize);
 				} else {
-					tree = new BTree(degree, bTreeFile);
+					tree = new BTree(degree, bTreeFile, cachesize);
 				} 
 			}
 
