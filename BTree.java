@@ -70,7 +70,7 @@ public class BTree {
 		file.writeInt(degree);
 	}
 
-	private static int optimalDegree() { 
+	public static int optimalDegree() { 
 
 		double optimal = 4096;
 		int Pointer = 4;

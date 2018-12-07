@@ -10,7 +10,7 @@ public class GeneBankSearch {
 		File file = new File(args[2]);
 		int cachesize = 0;
 		try {
-			if (Integer.parseInt(args[0]) == 1) {
+			if ((args[0]).equals("1")) {
 				if (Integer.parseInt(args[3]) <= 0) {
 					System.err.println("Cache size must be greater than 0");
 					System.exit(1);
@@ -58,7 +58,7 @@ public class GeneBankSearch {
 					System.out.println(query + ": " + retVal.getFrequency());
 				}
 			}
-			tree.root = root;
+			BTree.root = root;
 			tree.closeTree();
 			fileScan.close();
 			bTreeFile.close();
